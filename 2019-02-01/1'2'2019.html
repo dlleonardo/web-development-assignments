@@ -1,0 +1,239 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+	h2{
+		color:red;
+	}
+	table{
+		display:inline-flex;
+		margin-top:18px;
+		margin-bottom:12px;
+	}
+	table td{
+		height:24px;
+		width:48px;
+		text-align:center;
+		background-color:red;
+		border:1px solid black;
+		color:white;
+	}
+	button{
+		margin: 8px 4px 8px 4px;
+		padding: 4px;
+	}
+	#container{
+		text-align:center;
+		width:20%;
+		margin:auto;
+		border:4px solid black;
+	}
+	.containerCartella{
+		border:3px solid black;
+		margin:4px;
+		padding:4px;
+	}
+	
+	</style>
+	<script>
+		var alfabeto = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+		var premi = [5, 10, 20, 50, 100, 200];
+		var lettereVincenti = [];
+		var mieLettere = [];
+		var minAlf = 0;
+		var maxAlf = alfabeto.length-1;
+		var maxPremi = premi.length-1;
+		var esito;
+		var vincita = 0;
+	
+		function loadLayout(){
+		
+			document.getElementById("btnGratta").disabled = true;
+			
+			var tableLettereVincenti = document.getElementById("lettereVincenti");
+			var trow = document.createElement("tr");
+			tableLettereVincenti.appendChild(trow);
+			for(var i=1; i<=5; i++){
+				var tdLettera = document.createElement("td");
+				tdLettera.id = 'letteraVincente'+i;
+				trow.appendChild(tdLettera);
+			}
+			
+			numMieLettere = 1;
+			numPremi = 1;
+			var tableMieLettere1 = document.getElementById("mieLettere1");
+			var tableMieLettere2 = document.getElementById("mieLettere2");
+			
+			for(var k=1; k<=2; k++){
+				var trow = document.createElement("tr");
+				
+				if(k==1){
+					for(var j=1; j<=5; j++){
+				
+						var td = document.createElement("td");
+						td.id = 'lettera'+numMieLettere;
+						trow.appendChild(td);
+						numMieLettere++;
+					}
+				}
+				if(k==2){
+					for(var j=1; j<=5; j++){
+				
+						var td = document.createElement("td");
+						td.id = 'premio'+numPremi;
+						trow.appendChild(td);
+						numPremi++;
+					}
+				}
+				tableMieLettere1.appendChild(trow);
+			}			
+			
+			for(var k=1; k<=2; k++){
+				var trow = document.createElement("tr");
+				
+				if(k==1){
+					for(var j=1; j<=5; j++){
+				
+						var td = document.createElement("td");
+						td.id = 'lettera'+numMieLettere;
+						trow.appendChild(td);
+						numMieLettere++;
+					}
+					
+				}
+				if(k==2){
+				
+					for(var j=1; j<=5; j++){
+				
+						var td = document.createElement("td");
+						td.id = 'premio'+numPremi;
+						trow.appendChild(td);
+						numPremi++;
+					}
+				
+				}
+				tableMieLettere2.appendChild(trow);
+			}
+		}
+		
+		function scopriLettere(){
+		
+			document.getElementById("btnScopri").disabled = true;
+			document.getElementById("btnGratta").disabled = false;
+			
+			while(lettereVincenti.length < 5){
+				var obj={};
+				var lettera = Math.floor(Math.random()*(maxAlf - minAlf + 1))+minAlf;
+				lettera = alfabeto[lettera];
+				
+				if(lettereVincenti.map(function(obj) { return obj.lettera; }).indexOf(lettera) === -1){
+					obj.lettera = lettera;
+					obj.uscita = false;
+					lettereVincenti.push(obj);
+				}
+			}
+			
+			for(var k=1; k<=5; k++){
+				document.getElementById("letteraVincente"+k).textContent = lettereVincenti[k-1].lettera;
+			}
+		
+		}
+		
+		function estraiLettera(){
+		
+			var obj = {};
+			var dim = mieLettere.length;
+			var html = dim+1;
+			var lettera = Math.floor(Math.random()*(maxAlf - minAlf + 1))+minAlf;
+			var premio = Math.floor(Math.random()*(maxPremi - minAlf + 1))+minAlf;
+			
+			lettera = alfabeto[lettera];
+			premio = premi[premio];
+			
+			
+			while(mieLettere.map(function(obj) { return obj.lettera; }).indexOf(lettera) !== -1){
+				lettera = Math.floor(Math.random()*(maxAlf - minAlf + 1))+minAlf;
+				lettera = alfabeto[lettera];
+			}
+			
+			obj.lettera = lettera;
+			obj.premio = premio;
+			obj.uscita = false;
+			mieLettere.push(obj);
+			
+			document.getElementById("lettera"+html).textContent = lettera;
+			document.getElementById("premio"+html).textContent = premio;
+			
+			if(mieLettere.length == 10){
+				calcolaVincita();
+				document.getElementById("btnGratta").disabled = true;
+				esito = window.open("","","height=200, width=300");
+				esito.document.write("Hai vinto "+vincita+" Euro");
+				setTimeout(function(){ esito.close(); resetGame(); },5000);
+			}
+		}
+		
+		function calcolaVincita(){
+			for(var i=0; i<5; i++){
+				for(var j=0; j<10; j++){
+					if(lettereVincenti[i].lettera == mieLettere[j].lettera){
+						vincita += mieLettere[j].premio;
+					}
+				}
+			}
+		}
+		
+		function resetGame(){
+			lettereVincenti = [];
+			mieLettere = [];
+			vincita = 0;
+			document.getElementById("btnGratta").disabled = true;
+			document.getElementById("btnScopri").disabled = false;
+			document.getElementById("lettereVincenti").innerHTML = '';
+			document.getElementById("mieLettere1").innerHTML = '';
+			document.getElementById("mieLettere2").innerHTML = '';
+			loadLayout();
+		}
+	
+	</script>
+</head>
+<body onload="loadLayout()">
+
+	<div id="container">
+		<h2>Gratta e Vinci</h2>
+	
+		<div class="containerCartella">
+			<h3>Lettere Vincenti</h3>
+			<table>
+				<tbody id="lettereVincenti">
+			
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="containerCartella">
+		
+			<h3>Le Tue Lettere</h3>
+			<div id="leTueLettere">
+				<table>
+					<tbody id="mieLettere1">
+					
+					</tbody>
+				</table>
+				<table>
+					<tbody id="mieLettere2">
+					
+					</tbody>
+				</table>
+			</div>
+		</div>
+	
+		<div>
+			<button id="btnScopri" onclick="scopriLettere()">SCOPRI</button>
+			<button id="btnGratta" onclick="estraiLettera()" disabled>GRATTA</button>
+		</div>
+	
+	</div>
+
+</body>
+</html>
