@@ -1,0 +1,273 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	
+	<style>
+		h3{
+			color:red;
+		}
+		#timer{
+			width:10%;
+			margin:auto;
+			border:1px solid black;
+		}
+		#container{
+			text-align:center;
+		}
+		#left{
+			width:45%;
+			border: 1px solid gray;
+			margin-top: 18px;
+			margin-right:18px;
+			margin-bottom:18px;
+		}
+		#right{
+			width:45%;
+			border: 1px solid gray;
+			margin-top: 18px;
+			margin-left:18px;
+			margin-bottom:18px;
+		}
+		#containerPlCo{
+			display:inline-flex;
+			justify-content:center;
+		}
+	</style>
+	
+	<script>
+		var interval;
+		var globalNumGiocatore;
+		var globalNumComputer;
+		var globalTipoGiocatore;
+		var globalTipoComputer;
+		var punteggioGiocatore = 0;
+		var punteggioComputer = 0;
+		var esito;
+		var time;
+	
+		function loadLayout(){
+		
+			startTimer();
+			interval = setInterval(startTimer, 1000);
+		
+			var radioPariGiocatore = document.getElementById("pariGiocatore");
+			var radioDispariGiocatore = document.getElementById("dispariGiocatore");
+			var radioPariComputer = document.getElementById("pariComputer");
+			var radioDispariComputer = document.getElementById("dispariComputer");
+			
+			radioPariGiocatore.checked = false;
+			radioDispariGiocatore.checked = false;
+			radioPariComputer.checked = false;
+			radioDispariComputer.checked = false;
+		
+			document.getElementById("punteggioComputer").textContent = 0;
+			document.getElementById("punteggioGiocatore").textContent = 0;
+		}
+	
+		function setComputer(val){
+		
+			globalTipoGiocatore = val;
+			var radioPariComputer = document.getElementById("pariComputer");
+			var radioDispariComputer = document.getElementById("dispariComputer");
+			
+			if(val == 'pari'){
+				globalTipoComputer = val;
+				radioDispariComputer.checked = true;
+				return;
+			}
+			globalTipoComputer = 'dispari';
+			radioPariComputer.checked = true;
+		}
+		
+		function startGame(){
+		
+			var numeroGiocatore = document.getElementById("numeroGiocatore").value;
+			if(checkNum(numeroGiocatore)){
+			
+				var num = parseInt(numeroGiocatore);
+				if(num >= 0 && num <= 5){
+					globalNumGiocatore = num;
+					var numeroComputer = document.getElementById("numeroComputer");
+					var max = 5;
+					var min = 0;
+					var numComp = Math.floor(Math.random()*(max - min + 1))+min;
+					globalNumComputer = numComp;
+					numeroComputer.value = numComp;
+					setTimeout(endGame, 1000);
+				}
+				else{
+					alert("Il numero deve essere compreso fra 0 e 5.");
+				}
+			}
+			else{
+				alert("Numero non valido.");
+			}
+			
+		
+		}
+		
+		function checkNum(num){
+			return num.match("^[0-5]+$");
+		}
+		
+		function startTimer(){
+			var divTimer = document.getElementById("timer");
+			var date = new Date();
+			var hours = date.getHours();
+			var minutes = date.getMinutes();
+			var seconds = date.getSeconds();
+			
+			if(String(hours).length == 1){
+				hours = '0'+hours;
+			}			
+			if(String(minutes).length == 1){
+				minutes = '0'+minutes;
+			}
+			if(String(seconds).length == 1){
+				seconds = '0'+seconds;
+			}
+			
+			time = hours+':'+minutes+':'+seconds;
+			divTimer.innerHTML = '<div>'+hours+':'+minutes+':'+seconds+'</div>';
+		}
+		
+		function endGame(){
+		
+			var numGiocatore = document.getElementById("numeroGiocatore").value;
+			var numComputer = document.getElementById("numeroComputer").value;
+			var divPunteggioGiocatore = document.getElementById("punteggioGiocatore");
+			var divPunteggioComputer = document.getElementById("punteggioComputer");
+			
+			var intGiocatore = parseInt(numGiocatore);
+			var intComputer = parseInt(numComputer);
+			
+			var somma = intGiocatore + intComputer;
+			
+			if(somma == 0){
+				alert("Parita, nessun vincitore.");
+			}
+			else if(somma%2 == 0){
+				if(globalTipoGiocatore == 'pari'){
+					punteggioGiocatore++;
+				}
+				else{
+					punteggioComputer++;
+				}
+			}
+			else if(somma%2 == 1){
+				if(globalTipoGiocatore == 'dispari'){
+					punteggioGiocatore++;
+				}
+				else{
+					punteggioComputer++;
+				}
+			}
+			divPunteggioComputer.textContent = punteggioComputer;
+			divPunteggioGiocatore.textContent = punteggioGiocatore;
+			
+			if(punteggioGiocatore == 3){
+				winGame('Giocatore');
+			}
+			else if(punteggioComputer == 3){
+				winGame('Computer');
+			}
+			else{
+				var inputNumeroGiocatore = document.getElementById("numeroGiocatore");
+				var inputNumeroComputer = document.getElementById("numeroComputer");
+				var radioPariGiocatore = document.getElementById("pariGiocatore");
+				var radioDispariGiocatore = document.getElementById("dispariGiocatore");
+				var radioPariComputer = document.getElementById("pariComputer");
+				var radioDispariComputer = document.getElementById("dispariComputer");
+			
+				radioPariGiocatore.checked = false;
+				radioDispariGiocatore.checked = false;
+				radioPariComputer.checked = false;
+				radioDispariComputer.checked = false;
+				inputNumeroComputer.value = '';
+				inputNumeroGiocatore.value = '';
+			}
+		}
+		
+		function winGame(str){
+			clearInterval(interval);
+			esito = window.open("","","height=200, width=300");
+			esito.document.write("<p>"+time+"</p><p>Ha vinto:"+str+"</p>");
+			setTimeout(closeWindow, 5000);
+		}
+		
+		function closeWindow(){
+			esito.close();
+			loadLayout();
+			
+			globalTipoGiocatore = '';
+			globalTipoComputer = '';
+			punteggioGiocatore = 0;
+			punteggioComputer = 0;
+			
+			document.getElementById("numeroGiocatore").value = '';
+			document.getElementById("numeroComputer").value = '';
+			document.getElementById("punteggioGiocatore").textContent = '';
+			document.getElementById("punteggioComputer").textContent = '';
+		}
+	</script>
+</head>
+
+<body onload="loadLayout()">
+
+	<div id="container">
+	
+		<div>
+			<h3>Pari o Dispari</h3>
+			<div id="timer"></div>
+		</div>
+	
+		<div id="containerPlCo">
+		<div id="left">
+			<h3>Giocatore</h3>
+			
+			<div style="display:inline-flex;">Punteggio:
+				<div id="punteggioGiocatore"></div>
+			</div>
+			
+			<div>Numero (0-5):
+				<input id="numeroGiocatore" type="text" maxlength="1" minlenght="1" />
+			</div>
+			
+			<div>
+				<form>
+					<input type="radio" name="type" id="pariGiocatore" checked="false" value="pari" onclick="setComputer(this.value)" />Pari
+					<input type="radio" name="type" id="dispariGiocatore" checked="false" value="dispari" onclick="setComputer(this.value)" />Dispari
+				</form>
+			</div>
+			
+		</div>
+	
+		<div id="right">
+			<h3>Computer</h3>
+			
+			<div style="display:inline-flex;">Punteggio:
+				<div id="punteggioComputer"></div>
+			</div>
+			
+			<div>Numero (0-5):
+				<input id="numeroComputer" type="text" maxlength="1" minlenght="1" readonly />
+			</div>
+			
+			<div>
+				<form>
+					<input type="radio" name="type" id="pariComputer" checked="false" />Pari
+					<input type="radio" name="type" id="dispariComputer" checked="false" />Dispari
+				</form>
+			</div>	
+		</div>
+		</div>
+		
+		<div>
+			<button id="playBtn" onclick="startGame()">PLAY</button>
+		</div>
+		
+	</div>
+
+</body>
+
+</html>
