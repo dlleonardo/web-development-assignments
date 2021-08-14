@@ -1,0 +1,218 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+	table{
+		border-collapse:collapse;
+	}
+	#tabellaGioco td{
+		border:2px solid black;
+		width:32px;
+		height:32px;
+		background:darkblue;
+	}
+	#tableContainer{
+		display:flex;
+		justify-content:center;
+		margin-top:24px;
+	}
+	#headContainer{
+		text-align:center;
+	}
+	#tentativi{
+		width:2%;
+		text-align:center;
+	}
+	</style>
+	<script>
+		var tentativi;
+		var celleRandom = [];
+		var timeout;
+		var ordine = 1;
+		var esito;
+	
+		function loadLayout(){
+			var table = document.getElementById("tabellaGioco");
+			var numCella = 0;
+			for(var i=1; i<=6; i++){
+				var riga = document.createElement("tr");
+				riga.id = "row"+i;
+				table.appendChild(riga);
+				for(var j=1; j<=6; j++){
+					numCella++;
+					var cella = document.createElement("td");
+					cella.id = 'cella'+numCella;
+					riga.appendChild(cella);
+				}
+			
+			}
+		
+		}
+		
+		function startGame(){
+		
+			var btnStart = document.getElementById("btnStart");
+			btnStart.style.cursorEvent = 'none';
+			var inputTentativi = document.getElementById("tentativi");
+			tentativi = 4;
+			inputTentativi.value = tentativi;
+			numCella = 0;
+			for(var i=1; i<=6; i++){
+				
+				var tRow = document.getElementById("row"+i);
+				
+				for(var j=1;j<=6; j++){
+					numCella++;
+					var tdCella = document.getElementById("cella"+numCella);
+					tdCella.style.backgroundColor = 'white';
+				}
+			
+			}
+			
+			for(var k=0; k<4; k++){
+				var i = k;
+				i++;
+				var obj = {};
+			
+				var minNum = 1;
+				var maxNum = 4;
+				var randomNum = i;
+				
+				var minCella = 1;
+				var maxCella = 6;
+				var riga = Math.floor(Math.random()*(maxCella - minCella + 1))+minCella;
+				var colonna = Math.floor(Math.random()*(maxCella - minCella + 1))+minCella;
+				var randCella = riga*colonna;
+				
+				if(k>0){
+					for(var z=0; z<celleRandom.length; z++){
+						while(randCella == celleRandom[z].pos){
+							var riga = Math.floor(Math.random()*(maxCella - minCella + 1))+minCella;
+							var colonna = Math.floor(Math.random()*(maxCella - minCella + 1))+minCella;
+							randCella = riga*colonna;
+						}
+					}
+				}
+				
+				obj.numero = randomNum;
+				obj.pos = randCella;
+				obj.flag = false;
+				
+				celleRandom.push(obj);
+				
+			}
+			console.log(celleRandom);
+
+			
+			for(var i=0; i<4; i++){
+			
+				var tdCella = document.getElementById("cella"+celleRandom[i].pos);
+				tdCella.textContent = celleRandom[i].numero;
+				tdCella.style.backgroundColor = 'red';
+				
+			}
+			
+			timeout = setTimeout(hideCells, 3000);
+		
+		}
+		
+		function hideCells(){
+			for(var j=0; j<4; j++){
+				var tdCell = document.getElementById("cella"+celleRandom[j].pos);
+				tdCell.textContent = '';
+			}
+		
+			for(var i=1; i<=36; i++){
+				var tdCell = document.getElementById("cella"+i);
+				tdCell.style.backgroundColor = 'darkblue';
+				tdCell.addEventListener("click", clickCella);
+			}
+		
+		}
+		
+		function clickCella(event){
+		
+			var flag = false;
+			var flagWin = true;
+			var idCella = event.target.id;
+			
+			for(var i=0; i<4; i++){
+				if(idCella == 'cella'+celleRandom[i].pos && ordine == celleRandom[i].numero && celleRandom[i].flag == false){
+					flag = true;
+					celleRandom[i].flag = true;
+					var cella = document.getElementById("cella"+celleRandom[i].pos);
+					cella.style.backgroundColor = 'red';
+					cella.textContent = celleRandom[i].numero;
+					ordine++;
+				}
+			
+			}
+			
+			if(flag == false){
+				tentativi--;
+				var inputTentativi = document.getElementById("tentativi");
+				var divCella = document.getElementById(idCella);
+				divCella.style.backgroundColor = 'white';
+				inputTentativi.value = tentativi;
+			}
+			
+			for(var z=0; z<4; z++){
+				if(celleRandom[z].flag == false){
+					flagWin = false;
+				}
+			}
+			
+			if(tentativi == 0){
+				showWindow('lost');
+			}
+			
+			if(flagWin == true){
+				showWindow('win');
+			}
+			
+		}
+		
+		function showWindow(str){
+		
+			esito = window.open("","","height=200, width=300");
+			var errori = 4 - tentativi;
+			if(str == 'lost'){
+				esito.document.write("<p>Riprova.</p>");
+			}
+			if(str == 'win'){
+				esito.document.write("<p>Bravo, hai commesso solo "+errori+" errori.</p>");
+			}
+			setTimeout(function(){ esito.close(); },5000);
+			document.getElementById("tabellaGioco").innerHTML = '';
+			loadLayout();
+			ordine = 1;
+			tentativi = 4;
+			celleRandom = [];
+			document.getElementById("tentativi").value = 0;
+		}
+	
+	</script>
+</head>
+
+<body onload="loadLayout()">
+
+	<div>
+	
+		<div id="headContainer">
+			<strong>Tentativi:</strong>
+			<input id="tentativi" type="text" value="0" readonly />
+			<button id="btnStart" onclick="startGame()">START</button>
+		</div>
+		
+		<div id="tableContainer">
+			<table>
+				<tbody id="tabellaGioco">
+				</tbody>
+			</table>
+		</div>
+		
+	
+	</div>
+
+</body>
+</html>
