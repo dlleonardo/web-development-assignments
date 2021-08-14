@@ -1,0 +1,241 @@
+<html>
+
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+		#head{
+			width:50%;
+			margin:auto;
+			text-align:center;
+		}
+		#head div{
+			display:inline-block;
+		}
+		#tempo, #tentativi{
+			border:1px solid black;
+			width:24px;
+			height:20px;
+		}
+		#nums, #indovina{
+			width:50%;
+			margin:auto;
+			display:flex;
+			margin-top:24px;
+			justify-content:center;
+		}
+		#nums div, #indovina div{
+			border:1px solid black;
+			padding:12px;
+		}
+	</style>
+	
+	<script>
+		var numeri = [0,1,2,3,4,5,6,7,8,9];
+		var gioco = [];
+		var obj = {};
+		var tentativi = 3;
+		var time = 15000;
+		var interval;
+		var timeout;
+		var esito;
+		var intervalAlert;
+	
+		function loadLayout(){
+		
+			var nums = document.getElementById("nums");
+			var indovina = document.getElementById("indovina");
+		
+			for(var i=0; i<=9; i++){
+			
+				var divNum = document.createElement("div");
+				nums.appendChild(divNum);
+				divNum.textContent = i;
+				divNum.id = i;
+				
+			}
+			
+			for(var j=0; j<=3; j++){
+			
+				var divNum = document.createElement("div");
+				indovina.appendChild(divNum);
+				divNum.textContent = ' ';
+				divNum.id = 'indovina'+j;
+			}
+		
+		}
+
+		function startGame(){
+		
+			var btn = document.getElementById("btn");
+			btn.style.pointerEvents = 'none';
+		
+			var tempo = document.getElementById("tempo");
+			var divTentativi = document.getElementById("tentativi");
+			
+			time = 15000;
+			tentativi = 3;
+			divTentativi.textContent = '3';
+			tempo.textContent = time/1000;
+			
+			generateNumbers();
+			updateLayout();
+			
+			interval = setInterval(updateTimer, 1000);
+			timeout = setTimeout(stopGame, 15000);
+		}
+		
+		function updateTimer(){
+			time -= 1000;
+			var tempo = document.getElementById("tempo");
+			tempo.textContent = time/1000;
+		}
+		
+		function stopGame(){
+			clearInterval(interval);
+			clearTimeout(timeout);
+			
+			for(var i=0; i<4; i++){
+				
+				var divIndovina = document.getElementById("indovina"+i);
+				divIndovina.textContent = '';
+			
+			}
+			
+			gioco = [];
+			var tempo = document.getElementById("tempo");
+			tempo.textContent = '0';	
+			var btn = document.getElementById("btn");
+			btn.style.pointerEvents = 'auto';	
+			
+			esito = window.open("", "", "width=300,height=200");
+			esito.document.write("<p>Ritenta, sarai piu fortunato.</p>");
+			setTimeout(function(){ esito.close(); },3000);
+		}
+		
+		function winGame(){
+			clearInterval(interval);
+			clearTimeout(timeout);
+			gioco = [];
+			var tempo = document.getElementById("tempo");
+			
+			for(var i=0; i<4; i++){
+				
+				var divIndovina = document.getElementById("indovina"+i);
+				divIndovina.textContent = '';
+			
+			}
+			
+			var intTempo = parseInt(tempo.textContent);
+			var impiegato = 15 - intTempo;
+			
+			tempo.textContent = '0';	
+			var btn = document.getElementById("btn");
+			btn.style.pointerEvents = 'auto';
+			
+			esito = window.open("", "", "width=300,height=200");
+			esito.document.write("<p>Tempo impiegato: "+impiegato+" secondi.</p>");
+			setTimeout(function(){ esito.close(); },3000);
+		}
+	
+		function generateNumbers(){
+				
+			for(var i=0; i<4; i++){
+				var numero = Math.floor(Math.random()*10);
+				if(numero >= 0 && numero <= 9){
+					var obj = {};
+					obj.numero = numero;
+					obj.flag = false;
+					gioco.push(obj);
+				}
+			}
+			console.log(gioco);
+			
+		}
+		
+		function updateLayout(){
+			for(var i=0; i<4; i++){
+				var divIndovina = document.getElementById("indovina"+i);
+				divIndovina.textContent = gioco[i].numero;
+				divIndovina.style.fontSize = '0px';
+			}
+			
+			for(var i=0; i<10; i++){
+				var numero = document.getElementById(i);
+				numero.addEventListener("click", indovinaNumero);
+			}
+		}
+		
+		function indovinaNumero(event){
+		
+		if(gioco.length > 0){
+		
+			var divNumero = event.target.id;
+			var flag = false;
+			for(var i=0; i<4; i++){
+				if(divNumero == gioco[i].numero){
+					gioco[i].flag = true;
+					var divIndovina = document.getElementById("indovina"+i);
+					divIndovina.style.fontSize = '16px';
+					flag = true;
+				}
+			}
+			
+			flagWin = true;
+			
+			for(var j=0; j<4; j++){
+				if(gioco[j].flag == false){
+					flagWin = false;
+				}
+			}
+			
+			if(flag == false){
+				tentativi--;
+				var divTentativi = document.getElementById("tentativi");
+				divTentativi.textContent = String(tentativi);	
+				if(tentativi == 0){
+				
+					stopGame();
+				
+				}
+			}
+			if(flagWin == true){
+			
+				winGame();
+			
+			}
+		}
+		}
+	</script>
+</head>
+
+<body onload="loadLayout()">
+	
+	<div>
+	<div id="head">
+	
+		<div>
+			<strong>Tempo:</strong>
+			<div id="tempo">0</div>
+		</div>
+		
+		<div style="margin-left:24px;">
+			<strong>Tentativi:</strong>
+			<div id="tentativi">0</div>
+		</div>
+		
+		<div style="margin-left:24px;">
+			<button id="btn" onclick="startGame()">START</button>
+		</div>
+	
+	</div>
+	
+	<div id="indovina">
+	</div>
+	
+	<div id="nums">
+	</div>
+
+	</div>
+</body>
+
+</html>
