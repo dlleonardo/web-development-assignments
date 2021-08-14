@@ -1,0 +1,164 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+		table{
+			display:inline-flex;
+		}
+		table td{
+			width:32px;
+			height:32px;
+			border:1px solid black;
+		}
+		div{
+			margin: 18px 0 18px 0;
+		}
+		#container{
+			text-align:center;
+		}
+		#punteggio{
+			margin-top:18px;
+			width:84px;
+			text-align:center;
+		}
+	</style>
+	<script>
+		var celleGame = [];
+		var bersagli = 0;
+		var interval;
+		var timeout;
+		var round = 0;
+		var esito;
+	
+		function loadLayout(){
+		
+			var tableData = document.getElementById("tableData");
+			// 6 x 10
+			var num = 1;
+			for(var i=1; i<=6; i++){
+			
+				var trow = document.createElement("tr");
+				
+				for(var j=1; j<=10; j++){
+					var tdCella = document.createElement("td");
+					tdCella.id = 'cella'+num;
+					trow.appendChild(tdCella);
+					num++;
+				}
+				tableData.appendChild(trow);
+			}
+		
+		}
+		
+		function startGame(){
+		
+			var btn = document.getElementById("btn");
+			btn.style.pointerEvents = 'none';
+		
+			estraiCelle();
+			interval = setInterval(estraiCelle,3000);
+		}
+		
+		function estraiCelle(){
+			round++;
+			celleGame = [];
+			if(round <= 5){
+				for(var i=1; i<=60; i++){
+					document.getElementById("cella"+i).style.backgroundColor = 'white';
+				}
+			
+				clearTimeout(timeout);
+				var min = 1;
+				var max = 60;
+		
+				for(var i=1; i<=2; i++){
+					var obj = {};
+					var randomCell = Math.floor(Math.random()*(max - min + 1))+min;
+				
+					obj.cella = randomCell;
+					obj.id = 'cella'+randomCell;
+					obj.colpita = false;
+					obj.attiva = true;
+					celleGame.push(obj);
+				
+					var tdCella = document.getElementById("cella"+randomCell);
+					tdCella.style.backgroundColor = 'red';
+					tdCella.addEventListener("click", colpisciBersaglio);
+				}
+			
+				timeout = setTimeout(cambiaColoreCella,1000);
+			}
+			else{
+				clearInterval(interval);
+				clearTimeout(timeout);
+				mostraEsito();
+				setTimeout(function(){ esito.close(); resetGame(); }, 5000);
+			}
+			
+		}
+		
+		function cambiaColoreCella(){
+		
+			for(var i=0; i<2; i++){
+				celleGame[i].attiva = false;
+				var tdCella = document.getElementById(celleGame[i].id);
+				tdCella.style.backgroundColor = 'yellow';
+			}
+		
+		}
+		
+		function colpisciBersaglio(event){
+		
+			var idCella = event.target.id;
+			for(var i=0; i<2; i++){
+				if(celleGame[i].id == idCella && celleGame[i].attiva == true && celleGame[i].colpita == false){
+					celleGame[i].colpita = true;
+					bersagli++;
+				}
+			}
+			document.getElementById("punteggio").value = bersagli;
+		}
+		
+		function mostraEsito(){
+			esito = window.open("","","height=200, width=300");
+			esito.document.write("Il giocatore ha colpito "+bersagli+" bersagli.");
+		}
+		
+		function resetGame(){
+			celleGame = [];
+			bersagli = 0;
+			round = 0;
+			
+			for(var i=1; i<=60; i++){
+				document.getElementById("cella"+i).style.backgroundColor = 'white';
+			}
+			
+			document.getElementById("punteggio").value = '-';
+			document.getElementById("btn").style.pointerEvents = 'auto';
+		}
+	</script>
+</head>
+<body onload="loadLayout()">
+	<div id="container">
+		
+		<h2>TIRO AL BERSAGLIO</h2>
+		
+		<div><strong>Punteggio</strong><br>
+			<input id="punteggio" type="text" value="-" readonly />
+		</div>
+		
+		<div>
+			<table>
+				<tbody id="tableData">
+				
+				</tbody>
+			</table>
+		</div>
+		
+		<div>
+			<button id="btn" onclick="startGame()">START</button>
+		</div>
+		
+	</div>
+</body>
+</html>
