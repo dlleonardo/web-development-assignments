@@ -1,0 +1,234 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+	table{}
+	table td{
+		height:24px;
+		width:24px;
+		border:1px solid black;
+	}
+	#main{
+		text-align:center;
+	}
+	#container div{
+		margin-right:36px;
+	}
+	#cartella1 div{
+		width:24px;
+		height:24px;
+		text-align:center;
+		border:1px solid black;
+	}
+	#cartella2 div{
+		width:24px;
+		height:24px;
+		text-align:center;
+		border:1px solid black;
+	}
+	#numeroEstratto{
+		text-align:center;
+		width:88px;
+	}
+	#container{
+		display:inline-flex;
+		justify-content:center;
+	}
+	#divBtn{
+		margin-top:18px;
+	}
+	</style>
+	<script>
+		var giocatore1 = [];
+		var giocatore2 = [];
+		var gioco = [];
+		var interval;
+		var numeroEstratto;
+		var min = 1;
+		var max = 90;
+		var esito;
+	
+		function loadLayout(){
+			// matrice 9x10
+			var cartellone = document.getElementById("cartellone");
+			var numCella = 1;
+			
+			for(var i=1; i<=9; i++){
+			
+				var trow = document.createElement("tr");
+				
+				for(var j=1; j<=10; j++){
+					var obj = {};
+					var td = document.createElement("td");
+					td.id = 'cella'+numCella;
+					td.textContent = numCella;
+					obj.cella = numCella;
+					obj.uscita = false;
+					gioco.push(obj);
+					numCella++;
+					
+					trow.appendChild(td);
+				}
+				
+				cartellone.appendChild(trow);
+			}
+			
+			generaCartella(giocatore1);
+			generaCartella(giocatore2);
+			
+			printCartella(giocatore1, 1);
+			printCartella(giocatore2, 2);
+		}
+		
+		function generaCartella(giocatore){
+		
+			for(var i=0; i<15; i++){
+				var obj = {};
+				var numero = Math.floor(Math.random()*(max - min + 1))+min;
+			
+				if(i>0){
+					for(var j=0; j<giocatore.length; j++){
+						while(numero == giocatore[j].numero){
+							numero = Math.floor(Math.random()*(max - min + 1))+min;
+						}
+					}
+				}
+				obj.numero = numero;
+				obj.trovato = false;
+				giocatore.push(obj);
+			}
+			
+			giocatore.sort(function(a, b){ return (a.numero - b.numero); });
+		}
+		
+		function printCartella(cartella, num){
+		
+			var divCartella = document.getElementById("cartella"+num);
+			
+			for(var i=0; i<15; i++){
+			
+				var divCella = document.createElement("div");
+				divCella.style.backgroundColor = 'white';
+				if(num == 1){
+					divCella.textContent = giocatore1[i].numero;
+					divCella.id = "cellaGiocatore1-"+i;
+				}
+				if(num == 2){
+					divCella.textContent = giocatore2[i].numero;
+					divCella.id = "cellaGiocatore2-"+i;
+				}
+				divCartella.appendChild(divCella);
+			}
+		
+		}
+		
+		function startGame(){
+		
+			document.getElementById("btn").style.pointerEvents = 'none';
+			
+			interval = setInterval(estraiNumero, 100);
+		
+		}
+		
+		function estraiNumero(){
+			numeroEstratto = Math.floor(Math.random()*(max - min + 1))+min;
+			document.getElementById("numeroEstratto").value = numeroEstratto;
+			
+			for(var i=1; i<=90; i++){
+			
+				if(gioco[i-1].cella == numeroEstratto && gioco[i-1].uscita == false){
+					var tdCella = document.getElementById("cella"+i);
+					var txt = tdCella.textContent;
+					var numCella = parseInt(txt);
+					if(numeroEstratto == numCella){
+						tdCella.style.backgroundColor = 'red';
+						gioco[i-1].uscita = true;
+					}	
+				}
+			
+			}
+			
+			checkGiocatore(giocatore1, numeroEstratto, 1);
+			checkGiocatore(giocatore2, numeroEstratto, 2);
+		}
+		
+		function checkGiocatore(giocatore, numero, id){
+		
+			for(var i=0; i<15; i++){
+			
+				if(id == 1){
+					var divCella = document.getElementById("cellaGiocatore1-"+i);
+				}
+				if(id == 2){
+					var divCella = document.getElementById("cellaGiocatore2-"+i);
+				}
+				if(numero == giocatore[i].numero){
+					giocatore[i].trovato = true;
+					divCella.style.backgroundColor = 'red';
+				}
+			}
+		
+			var flag = true;
+			for(var i=0; i<15; i++){
+				if(giocatore[i].trovato == false){
+					flag = false;
+				}
+			}
+			
+			if(flag == true){
+				clearInterval(interval);
+				esito = window.open("","","height=200, width=300");
+				esito.document.write("<p>Tombola! Il Giocatore "+id+" ha vinto!</p>");
+				setTimeout(function(){ esito.close(); },5000);
+				giocatore1 = [];
+				giocatore2 = [];
+				document.getElementById("cartella1").innerHTML = '';
+				document.getElementById("cartella2").innerHTML = '';
+				document.getElementById("cartellone").innerHTML = '';
+				loadLayout();
+				document.getElementById("btn").style.pointerEvents = 'auto';
+				document.getElementById("numeroEstratto").value = '-';
+			}
+		
+		}
+	</script>
+</head>
+<body onload="loadLayout()">
+	<div id="main">
+		<h2>GIOCO DELLA TOMBOLA</h2>
+		
+		<div>
+			<strong>Numero Estratto</strong><br>
+			<input id="numeroEstratto" type="text" value="-" readonly />
+		</div>
+		
+		<div id="container">
+		<div>
+			<h3>Cartellone</h3>
+			<table>
+				<tbody id="cartellone">
+				
+				</tbody>
+			</table>
+		</div>
+		
+		<div>
+			<h3>Giocatore 1</h3>
+			<div id="cartella1">
+			
+			</div>
+		</div>
+		
+		<div>
+			<h3>Giocatore 2</h3>
+			<div id="cartella2">
+			
+			</div>
+		</div>
+		</div>
+		<div id="divBtn">
+			<button id="btn" onclick="startGame()">START</button>
+		</div>
+	</div>
+</body>
+</html>
