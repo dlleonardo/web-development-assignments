@@ -1,0 +1,171 @@
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<style>
+	table{
+		border-collapse:collapse;
+	}
+	table td{
+		width:32px;
+		height:32px;
+		border:2px solid black;
+		background-color:green;
+	}
+	#container{
+		text-align:center;
+	}
+	#divTable{
+		margin-top:24px;
+		display:inline-flex;
+	}
+	#tentativi{
+		width:64px;
+	}
+	</style>
+	<script>
+		var tentativi = 5;
+		var randCelle = [];
+		var esito;
+	
+		function loadLayout(){
+			var tableData = document.getElementById("tableData");
+			var num = 1;
+			for(var i=1; i<=6; i++){
+			
+				var trow = document.createElement("tr");
+				
+				for(var j=1; j<=6; j++){
+				
+					var td = document.createElement("td");
+					td.id = 'cella'+num;
+					num++;
+					trow.appendChild(td);
+				
+				}
+				tableData.appendChild(trow);
+			}
+		}
+		
+		function startGame(){
+		
+			document.getElementById("btn").style.pointerEvents = 'none';
+			document.getElementById("tentativi").value = tentativi;
+			
+			for(var i=1; i<=36; i++){
+				document.getElementById("cella"+i).style.backgroundColor = 'white';
+				document.getElementById("cella"+i).addEventListener("click", indovinaCella);
+			}
+			
+			for(var j=0; j<4; j++){
+				var obj = {};
+				var min = 1;
+				var max = 36;
+				var randCella = Math.floor(Math.random()*(max - min + 1))+min;
+				
+				if(j>0){
+					for(var k=0; k<randCelle.length; k++){
+						while(randCella == randCelle[k].pos){
+							randCella = Math.floor(Math.random()*(max - min + 1))+min;
+						}
+					}
+				}
+				
+				obj.pos = randCella;
+				obj.colpita = false;
+				obj.id = 'cella'+randCella;
+				randCelle.push(obj);
+			}
+			console.log(randCelle);
+			
+			for(var k=0; k<4; k++){
+				var tdCella = document.getElementById("cella"+randCelle[k].pos);
+				tdCella.style.backgroundColor = 'red';
+			}
+		
+			setTimeout(setWhiteCells,3000);
+		}
+		
+		function indovinaCella(event){
+			var flag = false;
+			var tdCella = event.target.id;
+			for(var z=0; z<4; z++){
+				if(tdCella == randCelle[z].id && randCelle[z].colpita == false){
+					randCelle[z].colpita = true;
+					document.getElementById(tdCella).style.backgroundColor = 'red';
+					flag = true;
+				}
+				if(tdCella == randCelle[z].id && randCelle[z].colpita == true){
+					flag = true;
+				}
+			}
+			
+			if(flag == false){
+				tentativi--;
+				document.getElementById("tentativi").value = tentativi;
+			}
+			
+			if(tentativi == 0){
+				mostraEsito('perso');
+			}
+			
+			var win = true;
+			for(var i=0; i<4; i++){
+				if(randCelle[i].colpita == false){
+					win = false;
+				}
+			}
+			if(win == true){
+				mostraEsito('vinto');
+			}
+		}
+		
+		function setWhiteCells(){
+			for(var i=1; i<=36; i++){
+				document.getElementById("cella"+i).style.backgroundColor = 'white';
+			}
+		}
+		
+		function setGreenCells(){
+			for(var i=1; i<=36; i++){
+				document.getElementById("cella"+i).style.backgroundColor = 'green';
+			}			
+		}
+		
+		function mostraEsito(str){
+			esito = window.open("","","width=300, height=200");
+		
+			if(str == 'perso'){
+				esito.document.write("<p>Riprova.</p>");
+			}
+			
+			if(str == 'vinto'){
+				var errori = 5 - parseInt(tentativi);
+				esito.document.write("<p>Bravo, hai commesso solo "+errori+" errori.</p>");
+			}
+			
+			setTimeout(function(){ esito.close(); },5000);
+			tentativi = 5;
+			randCelle = [];
+			document.getElementById("tentativi").value = '';
+			document.getElementById("btn").style.pointerEvents = 'auto';
+			setGreenCells();
+		}
+	
+	</script>
+</head>
+<body onload="loadLayout()">
+	<div id="container">
+		<div>
+			<strong>Tentativi:</strong> 
+			<input id="tentativi" type="text" value=" " readonly />
+			<button id="btn" onclick="startGame()">START</button>
+		</div>
+		<div id="divTable">
+			<table>
+				<tbody id="tableData">
+				</tbody>
+			</table>
+		</div>
+	</div>
+</body>
+</html>
