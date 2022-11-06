@@ -1,4 +1,4 @@
 # Web Development
-My web development university exams' solutions. 
+Solutions to web development uni assignments
 
-Made with pure Javascript, CSS and HTML (the solution is contained in the .html file)
+Made with Vanilla Javascript, CSS and HTML (the solution is contained in the .html file)
